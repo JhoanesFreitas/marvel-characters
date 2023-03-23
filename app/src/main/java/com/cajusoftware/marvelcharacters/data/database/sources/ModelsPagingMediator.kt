@@ -63,8 +63,8 @@ class ModelsPagingMediator(
             }?.let {
                 //TODO injetar dispatcher
                 if (loadKey == 0) withContext(Dispatchers.IO) {
-                    val count = async { characterDao.getCount() }
-                    if (count.await() == 0)
+                    val count = characterDao.getCount()
+                    if (count == 0)
                         invalidatePagingSourceCallback?.invoke()
                 }
                 characterDao.insertCharacters(it)

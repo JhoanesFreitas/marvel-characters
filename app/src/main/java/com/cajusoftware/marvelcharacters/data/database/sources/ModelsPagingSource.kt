@@ -26,35 +26,34 @@ class ModelsPagingSource(
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, CharacterModel> {
         //TODO injetar dispatcher
-        return withContext(Dispatchers.IO) {
-            val pageIndex = params.key ?: STARTING_PAGING_INDEX
+        val pageIndex = params.key ?: STARTING_PAGING_INDEX
 
-            try {
+        return try {
 
-                val daoResult =
-                    if (pageIndex == 0)
-                        characterDao.getCharactersForPaging(pageIndex, LASTING_INDEX_IN_FIRST_LOAD)
-                    else
-                        characterDao.getCharactersForPaging(pageIndex)
-
-                val result = mutableListOf<CharacterModel>()
-
-                if (pageIndex == 0 && daoResult.isNotEmpty()) {
-                    result.add(CharacterModel.CarouselItem())
-                }
-
-                result.addAll(daoResult.map {
-                    CharacterModel.CharacterItem(it.asCarouselCharacter())
-                })
-
-                LoadResult.Page(
-                    data = result,
-                    prevKey = if (pageIndex > STARTING_PAGING_INDEX) (pageIndex - 1) else null,
-                    nextKey = if (daoResult.isNotEmpty() && pageIndex == 0) LASTING_INDEX_IN_FIRST_LOAD else if (daoResult.isNotEmpty()) pageIndex + BuildConfig.PAGE_SIZE else null
-                )
-            } catch (e: IOException) {
-                LoadResult.Error(e)
+            val daoResult = withContext(Dispatchers.IO) {
+                if (pageIndex == 0)
+                    characterDao.getCharactersForPaging(pageIndex, LASTING_INDEX_IN_FIRST_LOAD)
+                else
+                    characterDao.getCharactersForPaging(pageIndex)
             }
+
+            val result = mutableListOf<CharacterModel>()
+
+            if (pageIndex == 0 && daoResult.isNotEmpty()) {
+                result.add(CharacterModel.CarouselItem())
+            }
+
+            result.addAll(daoResult.map {
+                CharacterModel.CharacterItem(it.asCarouselCharacter())
+            })
+
+            LoadResult.Page(
+                data = result,
+                prevKey = if (pageIndex > STARTING_PAGING_INDEX) (pageIndex - 1) else null,
+                nextKey = if (daoResult.isNotEmpty() && pageIndex == 0) LASTING_INDEX_IN_FIRST_LOAD else if (daoResult.isNotEmpty()) pageIndex + BuildConfig.PAGE_SIZE else null
+            )
+        } catch (e: IOException) {
+            LoadResult.Error(e)
         }
     }
 }
