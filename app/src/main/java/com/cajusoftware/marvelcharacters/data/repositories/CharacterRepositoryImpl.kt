@@ -13,7 +13,7 @@ import com.cajusoftware.marvelcharacters.data.domain.Character
 import com.cajusoftware.marvelcharacters.data.domain.CharacterModel
 import com.cajusoftware.marvelcharacters.utils.asCarouselCharacter
 import com.cajusoftware.marvelcharacters.utils.asCharacter
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.withContext
 
@@ -21,6 +21,7 @@ class CharacterRepositoryImpl(
     private val resources: Resources,
     private val characterDao: CharacterDao,
     private val remoteMediator: ModelsPagingMediator,
+    private val ioDispatcher: CoroutineDispatcher
 ) : CharacterRepository {
 
     @OptIn(ExperimentalPagingApi::class)
@@ -33,7 +34,7 @@ class CharacterRepositoryImpl(
             ),
             remoteMediator = remoteMediator,
         ) {
-            ModelsPagingSource(characterDao).apply {
+            ModelsPagingSource(characterDao, ioDispatcher).apply {
                 remoteMediator.invalidatePagingSourceCallback = { invalidate() }
             }
         }.flow.map { pagingData ->
@@ -48,9 +49,9 @@ class CharacterRepositoryImpl(
         }
 
     override val carouselCharacters: Flow<PagingData<CharacterModel>>
-        get() = pager.flowOn(Dispatchers.IO)
+        get() = pager.flowOn(ioDispatcher)
             .map {
-                it.insertSeparators { before, after ->
+                it.insertSeparators { before, _ ->
                     if (before is CharacterModel.CarouselItem) CharacterModel.TitleItem(
                         resources.getString(R.string.others_characters)
                     )
@@ -68,16 +69,14 @@ class CharacterRepositoryImpl(
         get() = _character
 
     override suspend fun getCharactersRandomly() {
-        //TODO injetar dispatcher
-        withContext(Dispatchers.IO) {
+        withContext(ioDispatcher) {
             val characters = characterDao.getCharactersRandomly().map { it.asCarouselCharacter() }
             _upperCarouselCharacters.emit(characters)
         }
     }
 
     override suspend fun fetchCharacter(characterId: Int) {
-        //TODO injetar dispatcher
-        withContext(Dispatchers.IO) {
+        withContext(ioDispatcher) {
             val marvelCharacter = characterDao.getCharacter(characterId).map { it?.asCharacter() }
             _character.emit(marvelCharacter.first())
         }

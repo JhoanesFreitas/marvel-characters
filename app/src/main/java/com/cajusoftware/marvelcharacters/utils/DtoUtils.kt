@@ -50,6 +50,7 @@ fun CharacterDto.asCarouselCharacter(): CarouselCharacter =
         eventsAmount = events?.items?.size,
         seriesAmount = series?.items?.size,
         storiesAmount = stories?.items?.size,
+        nextKey = nextKey
     )
 
 fun List<UrlsDto>.asUrls(): List<Urls> =

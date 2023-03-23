@@ -9,4 +9,5 @@ data class CarouselCharacter(
     val eventsAmount: Int?,
     val seriesAmount: Int?,
     val storiesAmount: Int?,
+    val nextKey: Int?
 )

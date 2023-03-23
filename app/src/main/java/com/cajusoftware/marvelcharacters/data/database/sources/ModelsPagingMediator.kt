@@ -9,8 +9,7 @@ import com.cajusoftware.marvelcharacters.data.domain.CharacterModel
 import com.cajusoftware.marvelcharacters.data.network.responses.CharacterDataWrapperResponse
 import com.cajusoftware.marvelcharacters.data.network.services.MarvelApiService
 import com.cajusoftware.marvelcharacters.utils.asCharacterDto
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import java.io.IOException
@@ -18,7 +17,8 @@ import java.io.IOException
 @OptIn(ExperimentalPagingApi::class)
 class ModelsPagingMediator(
     private val characterDao: CharacterDao,
-    private val marvelApiService: MarvelApiService
+    private val marvelApiService: MarvelApiService,
+    private val ioDispatcher: CoroutineDispatcher
 ) : RemoteMediator<Int, CharacterModel>() {
 
     var invalidatePagingSourceCallback: (() -> Unit)? = null
@@ -36,14 +36,14 @@ class ModelsPagingMediator(
                 LoadType.REFRESH -> 0
                 LoadType.PREPEND -> {
                     if (state.isEmpty()) 0
-                    else (state.lastItemOrNull() as? CharacterModel.CharacterDtoItem)?.character?.nextKey
+                    else (state.lastItemOrNull() as? CharacterModel.CharacterItem)?.character?.nextKey
                         ?: return MediatorResult.Success(
                             endOfPaginationReached = true
                         )
                 }
                 LoadType.APPEND -> {
                     val lastItem = if (state.isEmpty()) 0
-                    else (state.lastItemOrNull() as? CharacterModel.CharacterDtoItem)?.character?.nextKey
+                    else (state.lastItemOrNull() as? CharacterModel.CharacterItem)?.character?.nextKey
                         ?: return MediatorResult.Success(
                             endOfPaginationReached = true
                         )
@@ -53,21 +53,21 @@ class ModelsPagingMediator(
 
 
             val response: CharacterDataWrapperResponse =
-                //TODO injetar dispatcher
-                withContext(Dispatchers.IO) {
+                withContext(ioDispatcher) {
                     loadKey.let { marvelApiService.getCharacters(offset = it) }
                 }
 
             response.data?.results?.map {
                 it.asCharacterDto(response.copyright, response.data.nextKey)
             }?.let {
-                //TODO injetar dispatcher
-                if (loadKey == 0) withContext(Dispatchers.IO) {
-                    val count = characterDao.getCount()
-                    if (count == 0)
-                        invalidatePagingSourceCallback?.invoke()
+                withContext(ioDispatcher) {
+                    characterDao.insertCharacters(it)
+                    when {
+                        loadKey == 0 && loadType == LoadType.PREPEND -> invalidatePagingSourceCallback?.invoke()
+                        loadKey > 0 && loadType == LoadType.APPEND -> invalidatePagingSourceCallback?.invoke()
+                        else -> {}
+                    }
                 }
-                characterDao.insertCharacters(it)
             }
 
             MediatorResult.Success(

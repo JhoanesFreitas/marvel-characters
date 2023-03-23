@@ -14,9 +14,16 @@ import com.localebro.okhttpprofiler.OkHttpProfilerInterceptor
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.OkHttpClient
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+
+val diModule = module {
+    factory(named(DEFAULT_DISPATCHER)) { provideDefaultDispatcher() }
+    factory(named(IO_DISPATCHER)) { provideIoDispatcher() }
+    factory(named(MAIN_DISPATCHER)) { provideMainDispatcher() }
+}
 
 val dataModules = module {
     single {
@@ -28,11 +35,11 @@ val dataModules = module {
 
     single { get<MarvelDatabase>().characterDao() }
 
-    factory { ModelsPagingMediator(get(), get()) }
+    factory { ModelsPagingMediator(get(), get(), get(named(IO_DISPATCHER))) }
 
-    factory { provideCharacterRepository(get(), get(), get()) }
+    factory { provideCharacterRepository(get(), get(), get(), get(named(IO_DISPATCHER))) }
 
-    factory { ModelsPagingSource(get()) }
+    factory { ModelsPagingSource(get(), get(named(IO_DISPATCHER))) }
 
     single { CarouselCharacterSubject() }
 }

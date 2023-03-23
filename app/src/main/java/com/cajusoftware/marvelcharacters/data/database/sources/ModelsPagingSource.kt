@@ -6,7 +6,7 @@ import com.cajusoftware.marvelcharacters.BuildConfig
 import com.cajusoftware.marvelcharacters.data.database.dao.CharacterDao
 import com.cajusoftware.marvelcharacters.data.domain.CharacterModel
 import com.cajusoftware.marvelcharacters.utils.asCarouselCharacter
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import java.io.IOException
 
@@ -15,6 +15,7 @@ private const val LASTING_INDEX_IN_FIRST_LOAD = 19
 
 class ModelsPagingSource(
     private val characterDao: CharacterDao,
+    private val ioDispatcher: CoroutineDispatcher
 ) : PagingSource<Int, CharacterModel>() {
 
     override fun getRefreshKey(state: PagingState<Int, CharacterModel>): Int? {
@@ -25,12 +26,11 @@ class ModelsPagingSource(
     }
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, CharacterModel> {
-        //TODO injetar dispatcher
         val pageIndex = params.key ?: STARTING_PAGING_INDEX
 
         return try {
 
-            val daoResult = withContext(Dispatchers.IO) {
+            val daoResult = withContext(ioDispatcher) {
                 if (pageIndex == 0)
                     characterDao.getCharactersForPaging(pageIndex, LASTING_INDEX_IN_FIRST_LOAD)
                 else

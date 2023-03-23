@@ -39,7 +39,6 @@ class CharacterViewModel(private val characterRepository: CharacterRepository) :
     val shouldShowPlaceholder: LiveData<Boolean>
         get() = _shouldShowPlaceholder
 
-
     val scope: CoroutineScope
         get() = viewModelScope
 
