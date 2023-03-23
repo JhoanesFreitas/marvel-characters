@@ -5,22 +5,22 @@
     <data>
 
         <variable
-            name="shouldBeVisible"
-            type="Boolean" />
+            name="viewModel"
+            type="com.cajusoftware.marvelcharacters.ui.home.CharacterViewModel" />
     </data>
 
     <com.facebook.shimmer.ShimmerFrameLayout
         android:id="@+id/shimmer"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="horizontal"
         app:shimmer_auto_start="true"
-        app:visibility="@{shouldBeVisible}">
+        app:visibility="@{viewModel.shouldShowPlaceholder}">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:visibility="@{shouldBeVisible}">
+            app:visibility="@{viewModel.shouldShowPlaceholder}">
 
             <View
                 android:id="@+id/character_name_placeholder"

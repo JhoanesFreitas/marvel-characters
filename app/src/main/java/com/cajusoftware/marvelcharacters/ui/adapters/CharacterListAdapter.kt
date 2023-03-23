@@ -25,6 +25,7 @@ private const val TITLE_ITEM = 2
 class CharacterListAdapter(
     private val carouselCharacterSubject: CarouselCharacterSubject,
     private val onItemClickListener: ((Int) -> Unit),
+    private val shouldTurnOffPlaceholder: () -> Unit,
     private val shouldListeningUpperCarouselItems: () -> Unit
 ) : PagingDataAdapter<CharacterModel, CharacterListAdapter.CharacterModelViewHolder>(DiffCallback) {
 
@@ -111,6 +112,7 @@ class CharacterListAdapter(
                 upperCarouselView.post {
                     upperCarouselView.items = items
                     upperCarouselView.onItemClickListener = onItemClickListener
+                    shouldTurnOffPlaceholder()
                 }
             }
         }

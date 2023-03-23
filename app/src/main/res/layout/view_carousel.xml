@@ -16,11 +16,6 @@
         android:orientation="horizontal"
         app:layoutDescription="@xml/upper_carousel_scene">
 
-        <include
-            android:id="@+id/shimmer"
-            layout="@layout/shimmer_upper_carousel"
-            app:shouldBeVisible="@{!shouldBeVisible}" />
-
         <TextView
             android:id="@+id/character_name"
             android:layout_width="0dp"

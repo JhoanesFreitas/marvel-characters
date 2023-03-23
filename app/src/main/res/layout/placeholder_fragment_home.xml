@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.cajusoftware.marvelcharacters.ui.home.CharacterViewModel" />
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="@dimen/placeholder_margin_top"
+        android:orientation="vertical">
+
+        <include
+            layout="@layout/shimmer_upper_carousel"
+            app:viewModel="@{viewModel}" />
+
+        <com.facebook.shimmer.ShimmerFrameLayout
+            android:id="@+id/shimmer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:shimmer_auto_start="true"
+            app:visibility="@{viewModel.shouldShowPlaceholder}">
+
+            <View
+                android:id="@+id/character_name_placeholder"
+                style="@style/Theme.MarvelCharacters.ViewPlaceholder"
+                android:layout_width="150dp"
+                android:layout_height="20dp"
+                android:layout_marginStart="@dimen/upper_carousel_title_margin_start"
+                android:layout_marginTop="@dimen/upper_carousel_title_margin_top"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </com.facebook.shimmer.ShimmerFrameLayout>
+
+        <include
+            layout="@layout/shimmer_carousel_character"
+            app:viewModel="@{viewModel}" />
+
+    </LinearLayout>
+</layout>

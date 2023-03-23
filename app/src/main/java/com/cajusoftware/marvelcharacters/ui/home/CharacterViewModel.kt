@@ -4,7 +4,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.*
+import androidx.paging.CombinedLoadStates
+import androidx.paging.LoadState
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.cajusoftware.marvelcharacters.data.domain.CarouselCharacter
 import com.cajusoftware.marvelcharacters.data.domain.CharacterModel
 import com.cajusoftware.marvelcharacters.data.network.NoConnectivityException
@@ -17,7 +20,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.SharingStarted.Companion.Lazily
 import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 
@@ -61,6 +63,10 @@ class CharacterViewModel(private val characterRepository: CharacterRepository) :
                     characterRepository.getCharactersRandomly()
                 }
         }
+    }
+
+    fun setPlaceholderVisibility(isVisible: Boolean = false) {
+        _shouldShowPlaceholder.postValue(isVisible)
     }
 
     fun checkLoadState(loadState: CombinedLoadStates) {
