@@ -17,8 +17,8 @@ class UrlsConverter : BaseConverter() {
     }
 
     @TypeConverter
-    fun toUrlsDtoString(values: List<UrlsDto>): String {
-        return values.joinToString(separator)
+    fun toUrlsDtoString(values: List<UrlsDto>?): String {
+        return values?.joinToString(separator) ?: ""
     }
 
     @TypeConverter
@@ -27,7 +27,7 @@ class UrlsConverter : BaseConverter() {
     }
 
     @TypeConverter
-    fun toUrlsDtoString(values: UrlsDto): String {
-        return values.toDataString()
+    fun toUrlsDtoString(values: UrlsDto?): String {
+        return values?.toDataString() ?: ""
     }
 }

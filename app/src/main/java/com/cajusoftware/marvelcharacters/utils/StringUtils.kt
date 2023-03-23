@@ -92,7 +92,7 @@ inline fun <reified T : BaseSummaryDto> String.toBaseSummaryDto(): T {
 private fun String.getAvailable() = this
     .substringAfter("available=")
     .substringBefore(separator)
-    .toInt()
+    .toSafeInt()
 
 private fun String.getCollectionUri() = this
     .substringAfter("collection_uri=")
@@ -105,7 +105,7 @@ private fun String.getItems() = this
 private fun String.getReturned() = this
     .substringAfter("returned=")
     .substringBefore(separator)
-    .toInt()
+    .toSafeInt()
 
 private fun String.getName() = this
     .substringAfter("name=")
@@ -138,4 +138,10 @@ fun String.toSafeUri(): Uri? = try {
     this.toUri()
 } catch (e: NullPointerException) {
     null
+}
+
+fun String.toSafeInt() = try {
+    this.toInt()
+} catch (e: NumberFormatException) {
+    0
 }

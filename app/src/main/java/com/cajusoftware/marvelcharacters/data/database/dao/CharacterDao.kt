@@ -11,6 +11,9 @@ interface CharacterDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertCharacters(characters: List<CharacterDto>)
 
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertCharacter(characters: CharacterDto)
+
     @Query("SELECT * FROM character ORDER BY RANDOM() LIMIT :limit")
     fun getCharactersRandomly(limit: Int = 5): List<CharacterDto>
 

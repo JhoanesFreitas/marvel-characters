@@ -8,14 +8,14 @@ data class CharacterDto(
     @PrimaryKey(autoGenerate = false)
     val id: Int,
     val name: String?,
-    val description: String?,
-    val resourceUri: String?,
-    val urls: List<UrlsDto>?,
-    val thumbnail: ThumbnailDto?,
-    val comics: ComicsDto?,
-    val stories: StoriesDto?,
-    val events: EventsDto?,
-    val series: SeriesDto?,
+    val description: String? = null,
+    val resourceUri: String? = null,
+    val urls: List<UrlsDto>? = null,
+    val thumbnail: ThumbnailDto? = null,
+    val comics: ComicsDto? = null,
+    val stories: StoriesDto? = null,
+    val events: EventsDto? = null,
+    val series: SeriesDto? = null,
     val copyright: String? = null,
     val nextKey: Int? = null
 )

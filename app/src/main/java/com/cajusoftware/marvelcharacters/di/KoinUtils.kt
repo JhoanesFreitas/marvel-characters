@@ -1,5 +1,6 @@
 package com.cajusoftware.marvelcharacters.di
 
+import android.content.Context
 import com.cajusoftware.marvelcharacters.data.database.dao.CharacterDao
 import com.cajusoftware.marvelcharacters.data.database.sources.ModelsPagingMediator
 import com.cajusoftware.marvelcharacters.data.network.services.MarvelApiService
@@ -13,10 +14,11 @@ fun provideMarvelService(retrofit: Retrofit): MarvelApiService =
     retrofit.create(MarvelApiService::class.java)
 
 fun provideCharacterRepository(
+    context: Context,
     characterDao: CharacterDao,
     remoteMediator: ModelsPagingMediator
 ): CharacterRepository =
-    CharacterRepositoryImpl(characterDao, remoteMediator)
+    CharacterRepositoryImpl(context.resources, characterDao, remoteMediator)
 
 fun provideCharacterViewModel(characterRepository: CharacterRepository): CharacterViewModel =
     CharacterViewModel(characterRepository)

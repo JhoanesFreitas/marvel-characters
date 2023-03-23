@@ -1,37 +1,62 @@
 package com.cajusoftware.marvelcharacters.data.repositories
 
+import android.content.res.Resources
 import androidx.paging.*
 import com.cajusoftware.marvelcharacters.BuildConfig.PAGE_PREFETCH_DISTANCE
 import com.cajusoftware.marvelcharacters.BuildConfig.PAGE_SIZE
+import com.cajusoftware.marvelcharacters.R
 import com.cajusoftware.marvelcharacters.data.database.dao.CharacterDao
 import com.cajusoftware.marvelcharacters.data.database.sources.ModelsPagingMediator
 import com.cajusoftware.marvelcharacters.data.database.sources.ModelsPagingSource
 import com.cajusoftware.marvelcharacters.data.domain.CarouselCharacter
 import com.cajusoftware.marvelcharacters.data.domain.Character
+import com.cajusoftware.marvelcharacters.data.domain.CharacterModel
 import com.cajusoftware.marvelcharacters.utils.asCarouselCharacter
 import com.cajusoftware.marvelcharacters.utils.asCharacter
-import com.cajusoftware.marvelcharacters.utils.toCarouselCharacter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.withContext
 
 class CharacterRepositoryImpl(
+    private val resources: Resources,
     private val characterDao: CharacterDao,
-    remoteMediator: ModelsPagingMediator
+    private val remoteMediator: ModelsPagingMediator,
 ) : CharacterRepository {
 
     @OptIn(ExperimentalPagingApi::class)
-    private val pager = Pager(
-        config = PagingConfig(pageSize = PAGE_SIZE, prefetchDistance = PAGE_PREFETCH_DISTANCE),
-        remoteMediator = remoteMediator,
-    ) {
-        ModelsPagingSource(characterDao).apply {
-            remoteMediator.invalidatePagingSourceCallback = { invalidate() }
+    private val pager: Flow<PagingData<CharacterModel>>
+        get() = Pager(
+            config = PagingConfig(
+                pageSize = PAGE_SIZE,
+                prefetchDistance = PAGE_PREFETCH_DISTANCE,
+                enablePlaceholders = true
+            ),
+            remoteMediator = remoteMediator,
+        ) {
+            ModelsPagingSource(characterDao).apply {
+                remoteMediator.invalidatePagingSourceCallback = { invalidate() }
+            }
+        }.flow.map { pagingData ->
+            pagingData.map {
+                when (it) {
+                    is CharacterModel.CarouselItem -> CharacterModel.CarouselItem(it.itemName)
+                    is CharacterModel.CharacterItem -> CharacterModel.CharacterItem(it.character)
+                    is CharacterModel.TitleItem -> CharacterModel.TitleItem(it.title)
+                    is CharacterModel.CharacterDtoItem -> CharacterModel.CharacterDtoItem(it.character)
+                }
+            }
         }
-    }
 
-    override val carouselCharacters: Flow<PagingData<CarouselCharacter>>
-        get() = pager.flow.toCarouselCharacter()
+    override val carouselCharacters: Flow<PagingData<CharacterModel>>
+        get() = pager.flowOn(Dispatchers.IO)
+            .map {
+                it.insertSeparators { before, after ->
+                    if (before is CharacterModel.CarouselItem) CharacterModel.TitleItem(
+                        resources.getString(R.string.others_characters)
+                    )
+                    else null
+                }
+            }
 
     private val _upperCarouselCharacters: MutableStateFlow<List<CarouselCharacter>> =
         MutableStateFlow(listOf())
@@ -43,6 +68,7 @@ class CharacterRepositoryImpl(
         get() = _character
 
     override suspend fun getCharactersRandomly() {
+        //TODO injetar dispatcher
         withContext(Dispatchers.IO) {
             val characters = characterDao.getCharactersRandomly().map { it.asCarouselCharacter() }
             _upperCarouselCharacters.emit(characters)
@@ -50,6 +76,7 @@ class CharacterRepositoryImpl(
     }
 
     override suspend fun fetchCharacter(characterId: Int) {
+        //TODO injetar dispatcher
         withContext(Dispatchers.IO) {
             val marvelCharacter = characterDao.getCharacter(characterId).map { it?.asCharacter() }
             _character.emit(marvelCharacter.first())

@@ -35,13 +35,13 @@ import kotlinx.coroutines.launch
 
 
 @BindingAdapter("items")
-fun bindImages(carousel: CarouselView, items: List<CarouselCharacter>?) {
+fun bindItems(carousel: CarouselView, items: List<CarouselCharacter>?) {
     carousel.items = items
 }
 
 @Suppress("UNCHECKED_CAST")
 @BindingAdapter("items", "scope")
-fun bindImages(
+fun bindItems(
     recyclerView: RecyclerView,
     items: PagingData<Nothing>?,
     scope: CoroutineScope?

@@ -21,5 +21,5 @@ data class CharacterDataContainerResponse(
     val results: List<CharacterResponse>?,
 ) {
     val nextKey = if ((offset ?: 1) > (total ?: 0)) null else BuildConfig.SERVICE_PAGE_SIZE + (offset ?: 0)
-    val hasNext = (BuildConfig.SERVICE_PAGE_SIZE + (offset ?: 0)) <= (total ?: 0)
+    val hasNext = (BuildConfig.SERVICE_PAGE_SIZE + (offset ?: 0)) <= (((total ?: 2)/2))
 }

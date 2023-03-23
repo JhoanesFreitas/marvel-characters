@@ -19,8 +19,8 @@ class SeriesConverter : BaseConverter() {
     }
 
     @TypeConverter
-    fun toSeriesSummaryDtoString(values: List<SeriesSummaryDto>): String {
-        return values.joinToString(separator)
+    fun toSeriesSummaryDtoString(values: List<SeriesSummaryDto>?): String {
+        return values?.joinToString(separator) ?: ""
     }
 
     @TypeConverter
@@ -29,7 +29,7 @@ class SeriesConverter : BaseConverter() {
     }
 
     @TypeConverter
-    fun toSeriesString(values: SeriesDto): String {
-        return values.toDataString()
+    fun toSeriesString(values: SeriesDto?): String {
+        return values?.toDataString() ?: ""
     }
 }

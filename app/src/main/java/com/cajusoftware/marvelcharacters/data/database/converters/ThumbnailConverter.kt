@@ -11,7 +11,7 @@ class ThumbnailConverter : BaseConverter() {
     }
 
     @TypeConverter
-    fun toThumbnailDtoString(values: ThumbnailDto): String {
-        return values.toDataString()
+    fun toThumbnailDtoString(values: ThumbnailDto?): String {
+        return values?.toDataString() ?: ""
     }
 }

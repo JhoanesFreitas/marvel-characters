@@ -13,7 +13,8 @@ class MarvelApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        Thread.setDefaultUncaughtExceptionHandler(ExceptionHandler(this))
+        if (!BuildConfig.DEBUG)
+            Thread.setDefaultUncaughtExceptionHandler(ExceptionHandler(this))
         startKoin {
             androidContext(this@MarvelApplication)
             modules(dataModules, networkModules, uiModule)

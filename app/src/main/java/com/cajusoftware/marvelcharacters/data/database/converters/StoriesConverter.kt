@@ -19,8 +19,8 @@ class StoriesConverter : BaseConverter() {
     }
 
     @TypeConverter
-    fun toStoriesSummaryDtoString(values: List<StoriesSummaryDto>): String {
-        return values.joinToString(separator)
+    fun toStoriesSummaryDtoString(values: List<StoriesSummaryDto>?): String {
+        return values?.joinToString(separator) ?: ""
     }
 
     @TypeConverter
@@ -29,7 +29,7 @@ class StoriesConverter : BaseConverter() {
     }
 
     @TypeConverter
-    fun toSeriesString(values: StoriesDto): String {
-        return values.toDataString()
+    fun toSeriesString(values: StoriesDto?): String {
+        return values?.toDataString() ?: ""
     }
 }

@@ -19,8 +19,8 @@ class ComicsConverter : BaseConverter() {
     }
 
     @TypeConverter
-    fun toComicSummaryDtoString(values: List<ComicSummaryDto>): String {
-        return values.joinToString(separator)
+    fun toComicSummaryDtoString(values: List<ComicSummaryDto>?): String {
+        return values?.joinToString(separator) ?: ""
     }
 
     @TypeConverter
@@ -29,7 +29,7 @@ class ComicsConverter : BaseConverter() {
     }
 
     @TypeConverter
-    fun toComicsDtoString(values: ComicsDto): String {
-        return values.toDataString()
+    fun toComicsDtoString(values: ComicsDto?): String {
+        return values?.toDataString() ?: ""
     }
 }

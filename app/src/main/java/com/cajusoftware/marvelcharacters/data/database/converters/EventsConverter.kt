@@ -19,8 +19,8 @@ class EventsConverter : BaseConverter() {
     }
 
     @TypeConverter
-    fun toEventsSummaryDtoString(values: List<EventsSummaryDto>): String {
-        return values.joinToString(separator)
+    fun toEventsSummaryDtoString(values: List<EventsSummaryDto>?): String {
+        return values?.joinToString(separator) ?: ""
     }
 
     @TypeConverter
@@ -29,7 +29,7 @@ class EventsConverter : BaseConverter() {
     }
 
     @TypeConverter
-    fun toEventsDtoString(values: EventsDto): String {
-        return values.toDataString()
+    fun toEventsDtoString(values: EventsDto?): String {
+        return values?.toDataString() ?: ""
     }
 }

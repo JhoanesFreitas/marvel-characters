@@ -1,6 +1,7 @@
 package com.cajusoftware.marvelcharacters.ui.adapters
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.paging.CombinedLoadStates
 import androidx.paging.PagingDataAdapter
@@ -10,19 +11,61 @@ import coil.load
 import coil.request.CachePolicy
 import com.cajusoftware.marvelcharacters.R
 import com.cajusoftware.marvelcharacters.data.domain.CarouselCharacter
+import com.cajusoftware.marvelcharacters.data.domain.CharacterModel
+import com.cajusoftware.marvelcharacters.data.domain.observers.CarouselCharacterObserver
+import com.cajusoftware.marvelcharacters.data.domain.observers.CarouselCharacterSubject
 import com.cajusoftware.marvelcharacters.databinding.ItemCarouselCharacterBinding
+import com.cajusoftware.marvelcharacters.databinding.ItemTitleBinding
+import com.cajusoftware.marvelcharacters.databinding.ItemUpperCarouselBinding
 
-class CharacterListAdapter(private val onItemClickListener: ((Int) -> Unit)) :
-    PagingDataAdapter<CarouselCharacter, CharacterListAdapter.CharacterViewHolder>(DiffCallback) {
+private const val CHARACTER_ITEM = 0
+private const val CAROUSEL_ITEM = 1
+private const val TITLE_ITEM = 2
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CharacterViewHolder {
-        return CharacterViewHolder(
-            ItemCarouselCharacterBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        )
+class CharacterListAdapter(
+    private val carouselCharacterSubject: CarouselCharacterSubject,
+    private val onItemClickListener: ((Int) -> Unit),
+    private val shouldListeningUpperCarouselItems: () -> Unit
+) : PagingDataAdapter<CharacterModel, CharacterListAdapter.CharacterModelViewHolder>(DiffCallback) {
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CharacterModelViewHolder {
+        return when (viewType) {
+            CHARACTER_ITEM ->
+                CharacterViewHolder(
+                    ItemCarouselCharacterBinding.inflate(
+                        LayoutInflater.from(parent.context),
+                        parent,
+                        false
+                    )
+                )
+            CAROUSEL_ITEM -> CarouselItem(
+                ItemUpperCarouselBinding.inflate(
+                    LayoutInflater.from(parent.context),
+                    parent,
+                    false
+                )
+            )
+
+            else -> TitleItem(
+                ItemTitleBinding.inflate(
+                    LayoutInflater.from(parent.context),
+                    parent,
+                    false
+                )
+            )
+        }
     }
 
-    override fun onBindViewHolder(holder: CharacterViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: CharacterModelViewHolder, position: Int) {
         getItem(position)?.let { holder.bind(it) }
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return when (getItem(position)) {
+            is CharacterModel.CharacterItem -> CHARACTER_ITEM
+            is CharacterModel.CarouselItem -> CAROUSEL_ITEM
+            else -> TITLE_ITEM
+        }
     }
 
     fun stateFlow(stateCallback: (CombinedLoadStates) -> Unit) {
@@ -30,9 +73,10 @@ class CharacterListAdapter(private val onItemClickListener: ((Int) -> Unit)) :
     }
 
     inner class CharacterViewHolder(private val binding: ItemCarouselCharacterBinding) :
-        RecyclerView.ViewHolder(binding.root) {
+        CharacterModelViewHolder(binding.root) {
 
-        fun bind(character: CarouselCharacter) {
+        override fun bind(characterModel: CharacterModel) {
+            val character = (characterModel as CharacterModel.CharacterItem).character
             binding.apply {
                 characterName.text = character.name
                 characterDescription.text = character.copyright
@@ -54,17 +98,52 @@ class CharacterListAdapter(private val onItemClickListener: ((Int) -> Unit)) :
         }
     }
 
-    companion object DiffCallback : DiffUtil.ItemCallback<CarouselCharacter>() {
+    inner class CarouselItem(private val binding: ItemUpperCarouselBinding) :
+        CharacterModelViewHolder(binding.root), CarouselCharacterObserver {
+
+        override fun bind(characterModel: CharacterModel) {
+            carouselCharacterSubject.attach(this)
+            shouldListeningUpperCarouselItems()
+        }
+
+        override fun collect(items: List<CarouselCharacter>) {
+            binding.apply {
+                upperCarouselView.post {
+                    upperCarouselView.items = items
+                    upperCarouselView.onItemClickListener = onItemClickListener
+                }
+            }
+        }
+
+        fun unbind() {
+            carouselCharacterSubject.detach(this)
+        }
+    }
+
+    inner class TitleItem(private val binding: ItemTitleBinding) :
+        CharacterModelViewHolder(binding.root) {
+
+        override fun bind(characterModel: CharacterModel) {
+            binding.title.text = (characterModel as? CharacterModel.TitleItem)?.title ?: "Error"
+        }
+    }
+
+    abstract class CharacterModelViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        abstract fun bind(characterModel: CharacterModel)
+    }
+
+    companion object DiffCallback : DiffUtil.ItemCallback<CharacterModel>() {
         override fun areItemsTheSame(
-            oldItem: CarouselCharacter,
-            newItem: CarouselCharacter
+            oldItem: CharacterModel,
+            newItem: CharacterModel
         ): Boolean {
-            return oldItem.id == newItem.id
+            return (oldItem as? CharacterModel.CharacterItem)?.character?.id == (newItem as? CharacterModel.CharacterItem)?.character?.id ||
+                    (oldItem as? CharacterModel.TitleItem)?.title == (newItem as? CharacterModel.TitleItem)?.title
         }
 
         override fun areContentsTheSame(
-            oldItem: CarouselCharacter,
-            newItem: CarouselCharacter
+            oldItem: CharacterModel,
+            newItem: CharacterModel
         ): Boolean {
             return oldItem == newItem
         }

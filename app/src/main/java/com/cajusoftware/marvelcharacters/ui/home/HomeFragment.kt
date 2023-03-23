@@ -7,16 +7,19 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
-import com.cajusoftware.marvelcharacters.databinding.FragmentHomeBinding
+import com.cajusoftware.marvelcharacters.data.domain.observers.CarouselCharacterSubject
+import com.cajusoftware.marvelcharacters.databinding.FragmentHomeAlternativBinding
 import com.cajusoftware.marvelcharacters.ui.adapters.CharacterListAdapter
 import com.cajusoftware.marvelcharacters.ui.home.HomeFragmentDirections.Companion.actionHomeFragmentToCharacterDetailFragment
 import org.koin.android.ext.android.inject
 
 class HomeFragment : Fragment() {
 
-    private lateinit var binding: FragmentHomeBinding
+    private lateinit var binding: FragmentHomeAlternativBinding
 
     private val characterViewModel: CharacterViewModel by inject()
+
+    private val carouselCharacterSubject: CarouselCharacterSubject by inject()
 
     private val navController: NavController by lazy { findNavController() }
 
@@ -28,19 +31,30 @@ class HomeFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentHomeBinding.inflate(inflater)
+        binding = FragmentHomeAlternativBinding.inflate(inflater)
 
         characterViewModel.getCharactersToUpperCarousel()
         characterViewModel.getCharacters()
 
-        binding.brandModelsRecyclerView.adapter = CharacterListAdapter(onItemClickListener)
-            .apply { stateFlow(characterViewModel::checkLoadState) }
-
-        binding.upperCarouselView.onItemClickListener = onItemClickListener
+        binding.brandModelsRecyclerView.adapter = CharacterListAdapter(
+            carouselCharacterSubject,
+            onItemClickListener
+        ) {
+            characterViewModel.upperCarouselItems.observe(viewLifecycleOwner) {
+                carouselCharacterSubject.notify(it)
+            }
+        }.apply {
+            stateFlow(characterViewModel::checkLoadState)
+        }
 
         binding.lifecycleOwner = viewLifecycleOwner
         binding.viewModel = characterViewModel
 
         return binding.root
+    }
+
+    override fun onPause() {
+        (binding.brandModelsRecyclerView.findViewHolderForAdapterPosition(0) as? CharacterListAdapter.CarouselItem)?.unbind()
+        super.onPause()
     }
 }

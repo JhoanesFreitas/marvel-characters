@@ -4,19 +4,21 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.CombinedLoadStates
-import androidx.paging.LoadState
-import androidx.paging.PagingData
-import androidx.paging.cachedIn
+import androidx.paging.*
 import com.cajusoftware.marvelcharacters.data.domain.CarouselCharacter
+import com.cajusoftware.marvelcharacters.data.domain.CharacterModel
 import com.cajusoftware.marvelcharacters.data.network.NoConnectivityException
 import com.cajusoftware.marvelcharacters.data.repositories.CharacterRepository
 import com.cajusoftware.marvelcharacters.utils.NetworkUtils.exceptionHandler
 import com.cajusoftware.marvelcharacters.utils.RetryCallback
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.SharingStarted.Companion.Lazily
 import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 
 class CharacterViewModel(private val characterRepository: CharacterRepository) : ViewModel() {
@@ -27,8 +29,8 @@ class CharacterViewModel(private val characterRepository: CharacterRepository) :
     val upperCarouselItems: LiveData<List<CarouselCharacter>>
         get() = _upperCarouselItems
 
-    private val _carouselItems = MutableLiveData<PagingData<CarouselCharacter>>()
-    val carouselItems: LiveData<PagingData<CarouselCharacter>>
+    private val _carouselItems = MutableLiveData<PagingData<CharacterModel>>()
+    val carouselItems: LiveData<PagingData<CharacterModel>>
         get() = _carouselItems
 
     private val _shouldShowPlaceholder = MutableLiveData(true)
@@ -41,7 +43,7 @@ class CharacterViewModel(private val characterRepository: CharacterRepository) :
 
     fun getCharactersToUpperCarousel() {
         viewModelScope.launch {
-            characterRepository.upperCarouselCharacters.collectLatest {
+            characterRepository.upperCarouselCharacters.shareIn(this, Lazily).collectLatest {
                 _upperCarouselItems.postValue(it)
             }
         }
@@ -49,9 +51,10 @@ class CharacterViewModel(private val characterRepository: CharacterRepository) :
 
     fun getCharacters() {
         currentJob?.cancel()
-        currentJob = viewModelScope.launch {
+        currentJob = viewModelScope.launch(Dispatchers.IO) {
             characterRepository.carouselCharacters
                 .cancellable()
+                .shareIn(this, Lazily)
                 .cachedIn(viewModelScope)
                 .collectLatest {
                     _carouselItems.postValue(it)

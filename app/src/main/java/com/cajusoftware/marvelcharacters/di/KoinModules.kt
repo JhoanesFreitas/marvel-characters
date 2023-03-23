@@ -6,6 +6,7 @@ import com.cajusoftware.marvelcharacters.BuildConfig.DEBUG
 import com.cajusoftware.marvelcharacters.data.database.MarvelDatabase
 import com.cajusoftware.marvelcharacters.data.database.sources.ModelsPagingMediator
 import com.cajusoftware.marvelcharacters.data.database.sources.ModelsPagingSource
+import com.cajusoftware.marvelcharacters.data.domain.observers.CarouselCharacterSubject
 import com.cajusoftware.marvelcharacters.data.network.interceptors.ConnectivityInterceptor
 import com.cajusoftware.marvelcharacters.data.network.interceptors.NetworkInterceptor
 import com.cajusoftware.marvelcharacters.ui.MainViewModel
@@ -29,9 +30,11 @@ val dataModules = module {
 
     factory { ModelsPagingMediator(get(), get()) }
 
-    factory { provideCharacterRepository(get(), get()) }
+    factory { provideCharacterRepository(get(), get(), get()) }
 
     factory { ModelsPagingSource(get()) }
+
+    single { CarouselCharacterSubject() }
 }
 
 val networkModules = module {
