@@ -48,8 +48,8 @@ class CarouselView(context: Context, attrs: AttributeSet) : LinearLayout(context
                             diskCachePolicy(CachePolicy.ENABLED)
                         }
 
-                        characterName.text = items?.get(index)?.name
-                        characterDescription.text = items?.get(index)?.copyright
+                        characterName.text = items?.get(currentIndex)?.name
+                        characterDescription.text = items?.get(currentIndex)?.copyright
 
                         view.setOnClickListener {
 

@@ -21,7 +21,7 @@
     <fragment
         android:id="@+id/characterDetailFragment"
         android:name="com.cajusoftware.marvelcharacters.ui.details.CharacterDetailFragment"
-        android:label="CharacterDetailFragment">
+        android:label="Character Detail">
         <argument
             android:name="itemId"
             app:argType="integer" />
