@@ -108,6 +108,7 @@
                 android:layout_marginTop="@dimen/default_margin_top"
                 android:elevation="2dp"
                 android:scaleType="centerCrop"
+                android:transitionName="firstCharacterImage"
                 app:layout_constraintTop_toBottomOf="@+id/character_description_text_view"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"

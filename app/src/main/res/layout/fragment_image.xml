@@ -13,31 +13,24 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="?attr/fullscreenBackgroundColor"
+        android:background="@android:color/transparent"
         android:fitsSystemWindows="true"
         android:theme="@style/ThemeOverlay.MarvelCharacters.FullscreenContainer"
-        tools:context=".ui.details.ImageFragment">
+        tools:context=".ui.details.ImageDialogFragment">
 
         <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/image_view"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:background="@android:color/transparent"
+            android:scaleType="centerCrop"
+            android:transitionName="characterImage"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:src="@{uri}"
             tools:src="@drawable/bryce_canyon" />
-
-        <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/close"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/close_button_margin_top"
-            android:layout_marginEnd="@dimen/close_button_margin_end"
-            android:src="@android:drawable/ic_menu_close_clear_cancel"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

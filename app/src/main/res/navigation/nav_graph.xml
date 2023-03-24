@@ -25,19 +25,5 @@
         <argument
             android:name="itemId"
             app:argType="integer" />
-        <action
-            android:id="@+id/action_characterDetailFragment_to_imageFragment"
-            app:destination="@id/imageFragment"
-            app:enterAnim="@anim/slide_in_right"
-            app:popEnterAnim="@anim/slide_in_right" />
-    </fragment>
-    <fragment
-        android:id="@+id/imageFragment"
-        android:name="com.cajusoftware.marvelcharacters.ui.details.ImageFragment"
-        android:label="fragment_image"
-        tools:layout="@layout/fragment_image">
-        <argument
-            android:name="image_url"
-            app:argType="string" />
     </fragment>
 </navigation>
