@@ -34,7 +34,7 @@
     </style>
 
     <style name="Theme.MarvelCharacters.ImageRounded.Circle">
-        <item name="cornerSize">50dp</item>
+        <item name="cornerSize">49dp</item>
     </style>
 
     <style name="Theme.MarvelCharacters.ImageCarousel">
