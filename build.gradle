@@ -25,10 +25,10 @@ buildscript {
 
         //lifecycle and async
         coroutines_version = '1.4.2'
-        lifecycle_version = '2.6.0'
+        lifecycle_version = '2.6.1'
 
         //data
-        room_version = '2.5.0'
+        room_version = '2.5.1'
         paging_version = '3.1.1'
 
         //ui
@@ -37,7 +37,7 @@ buildscript {
         coil_version = '1.1.1'
         nav_version = '2.5.3'
         shimmer_version = '0.3.0@aar'
-        fragment_version = "1.5.5"
+        fragment_version = "1.5.6"
 
         //di
         koin_version = '3.3.3'

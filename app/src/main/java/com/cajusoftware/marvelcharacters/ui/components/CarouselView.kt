@@ -13,6 +13,9 @@ import com.cajusoftware.marvelcharacters.data.domain.CarouselCharacter
 import com.cajusoftware.marvelcharacters.databinding.ViewCarouselBinding
 import com.google.android.material.imageview.ShapeableImageView
 
+private const val TRANSITION_DELAY = 1000
+private const val SET_FINISH_DELAY = 300L
+
 class CarouselView(context: Context, attrs: AttributeSet) : LinearLayout(context, attrs) {
 
     private val binding = ViewCarouselBinding.inflate(LayoutInflater.from(context), this, true)
@@ -27,6 +30,8 @@ class CarouselView(context: Context, attrs: AttributeSet) : LinearLayout(context
 
     var onItemClickListener: ((Int) -> Unit)? = null
 
+    private var isFinished = true
+
     init {
         val typedArray = context.obtainStyledAttributes(attrs, R.styleable.CarouselView)
         typedArray.recycle()
@@ -40,7 +45,7 @@ class CarouselView(context: Context, attrs: AttributeSet) : LinearLayout(context
                         return items?.size ?: 0
                     }
 
-                    override fun populate(view: View, index: Int) {
+                    override fun populate(view: View?, index: Int) {
                         (view as? ShapeableImageView)?.load(items?.get(index)?.thumbnail?.thumbnailUri) {
                             placeholder(R.drawable.loading_animation)
                             error(R.drawable.ic_broken_image)
@@ -51,18 +56,12 @@ class CarouselView(context: Context, attrs: AttributeSet) : LinearLayout(context
                         characterName.text = items?.get(currentIndex)?.name
                         characterDescription.text = items?.get(currentIndex)?.copyright
 
-                        view.setOnClickListener {
+                        view?.setOnClickListener {
 
-                            if (currentIndex != index) {
-                                val lastItem = carousel.count - 1
-                                when (currentIndex) {
-                                    0 -> if (index == 1)
-                                        transitionToIndex(index, 1000) else jumpToIndex(index)
-                                    lastItem -> if (index == lastItem - 1)
-                                        transitionToIndex(index, 1000) else jumpToIndex(index)
-                                    else -> transitionToIndex(index, 1000)
-                                }
-                            } else
+                            if (currentIndex != index && isFinished) {
+                                isFinished = false
+                                transitionToIndex(index, TRANSITION_DELAY)
+                            } else if (currentIndex == index)
                                 onItemClickListener?.invoke(
                                     items?.get(index)?.id ?: throw CarouselItemNotFound()
                                 )
@@ -70,6 +69,7 @@ class CarouselView(context: Context, attrs: AttributeSet) : LinearLayout(context
                     }
 
                     override fun onNewItem(index: Int) {
+                        postDelayed({ isFinished = true }, SET_FINISH_DELAY)
                     }
                 })
             }.also { carousel.refresh() }
